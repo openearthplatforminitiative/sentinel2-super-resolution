@@ -15,7 +15,6 @@ from affine import Affine  # type: ignore[import-untyped]
 from sensorsio.utils import bb_snap
 from sentinel2_l3 import Sentinel2L3
 from tqdm import tqdm
-from tilefinder.toRGB import toRGB
 import yaml
 
 
@@ -215,8 +214,8 @@ def run(model_yaml,
         "driver": "GTiff",
         "height": int((roi[3] - roi[1]) / target_resolution),
         "width": int((roi[2] - roi[0]) / target_resolution),
-        "count": 3,
-        "dtype": np.uint8,
+        "count": 4,
+        "dtype": np.int16,
         "crs": s2_ds.crs,
         "transform": transform,
         "nodata": 0,
@@ -229,15 +228,8 @@ def run(model_yaml,
     # Derive output file name
     out_sr_file = os.path.join(
         output_dir,
-        str(s2_ds.satellite.value)
-        + "_"
-        + f"{s2_ds.year}-{s2_ds.quartile}"
-        + level
-        + "T"
-        + s2_ds.tile
-        + f"_{model_parameters.name}_"
-        + str(target_resolution).replace(".", "m").rstrip("0")
-        + "_sisr.tif",
+        s2_ds.product_name
+        + "_sisr.incomplete.tif",
     )
     _logger.info(f"Super-resolved output image: {out_sr_file}")
 
@@ -253,8 +245,6 @@ def run(model_yaml,
                 no_data_value=-32768,
                 algorithm=rio.enums.Resampling.cubic,
             )[0]
-
-            print(chunk.source_area)
 
             data_array = data_array.astype(np.float32)
 
@@ -275,7 +265,7 @@ def run(model_yaml,
             else:
                 cropped_output = output
 
-            # Find location to write in ouptut image
+            # Find location to write in output image
             window = rio.windows.Window(
                 int(np.ceil((chunk.target_area.left - roi.left) / target_resolution)),
                 int(np.floor((roi.top - chunk.target_area.top) / target_resolution)),
@@ -283,18 +273,18 @@ def run(model_yaml,
                 int(np.ceil((chunk.target_area.top - chunk.target_area.bottom) / target_resolution)),
             )
 
-            print(chunk.target_area.right)
-            print(chunk.target_area.left)
-            print((chunk.target_area.right - chunk.target_area.left) / target_resolution)
-
-            # Color correct and contrast enhance
-            corrected_output = toRGB(cropped_output[0:3])
-
-            # Write ouptut image
+            # Write output image
             rio_ds.descriptions = tuple(['Blue',
                                          'Green',
-                                         'Red'])
-            rio_ds.write(corrected_output, window=window)
+                                         'Red',
+                                         'NIR'])
+            rio_ds.write(cropped_output, window=window)
+
+    # Mark file as complete and remove old file
+    os.rename(out_sr_file, f"{output_dir}/{s2_ds.product_name}_sisr.tif")
+    os.remove(input)
+
+    return f"{output_dir}/{s2_ds.product_name}_sisr.tif"
 
 
 if __name__ == '__main__':
