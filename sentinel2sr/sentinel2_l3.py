@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright: (c) 2021 CESBIO / Centre National d'Etudes Spatiales / Université Paul Sabatier (UT3)
+# Copyright: (c) 2025 Open Earth Platform Initiative
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
