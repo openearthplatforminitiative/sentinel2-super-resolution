@@ -288,4 +288,4 @@ def run(model_yaml,
 
 
 if __name__ == '__main__':
-    run("model/s2v2x2_spatrad.yaml", "data/e46af4b23474a1f85bed9b783f418795.tif", output_dir="../results/")
+    run("../model/s2v2x2_spatrad.yaml", "../data/e46af4b23474a1f85bed9b783f418795.tif", output_dir="../results/")

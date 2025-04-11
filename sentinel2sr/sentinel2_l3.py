@@ -22,7 +22,8 @@ Driver for Sentinel2 L3 Mosaics
 import os
 from enum import Enum
 from typing import List, Optional, Tuple
-from sensorsio import regulargrid, storage
+from sensorsio import regulargrid
+from regulargrid import read_as_numpy
 
 import numpy as np
 import rasterio as rio
@@ -38,8 +39,7 @@ class Sentinel2L3:
         product_path: str,
         year: int,
         quartile: str,
-        offsets: Optional[Tuple[float, float]] = None,
-        s3_context: Optional[storage.S3Context] = None,
+        offsets: Optional[Tuple[float, float]] = None
     ):
         """
         Constructor
@@ -47,9 +47,6 @@ class Sentinel2L3:
         :param product_path: Path to product
         :param offsets: Shifts applied to image orgin (as computed by StackReg for instance)
         """
-        # Store s3 context
-        self.s3_context = s3_context
-
         # Store product DIR
         self.product_dir = os.path.abspath(os.path.join(product_path, os.pardir))
         self.product_name = os.path.basename(product_path)
@@ -159,19 +156,14 @@ class Sentinel2L3:
 
         :return: The path to the band file
         """
-        band_path = storage.agnostic_regex(
-            f"{self.product_dir}",
-            f"{self.product_name}.tif",
-            s3_context=self.s3_context,
-            use_gdal_adressing=True,
-        )
+        band_path = os.path.join(self.product_dir, f"{self.product_name}.tif")
 
         # Raise
-        if len(band_path) == 0:
+        if not os.path.exists(band_path):
             raise FileNotFoundError(
                 f"Could not find band {band.value} in directory {self.product_dir}"
             )
-        return band_path[0]
+        return band_path
 
     def read_as_numpy(
         self,
@@ -214,7 +206,7 @@ class Sentinel2L3:
         if len(bands):
 
             img_files = [self.build_band_path(self.B2)]
-            np_arr, xcoords, ycoords, out_crs = regulargrid.read_as_numpy(
+            np_arr, xcoords, ycoords, out_crs = read_as_numpy(
                 img_files,
                 crs=crs,
                 resolution=resolution,
