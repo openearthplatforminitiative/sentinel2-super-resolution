@@ -13,7 +13,7 @@ import numpy as np
 import onnxruntime as ort  # type: ignore[import-untyped]
 import rasterio as rio  # type: ignore[import-untyped]
 from affine import Affine  # type: ignore[import-untyped]
-from sentinel2_l3 import Sentinel2L3
+from .sentinel2_l3 import Sentinel2L3
 from tqdm import tqdm
 import yaml
 

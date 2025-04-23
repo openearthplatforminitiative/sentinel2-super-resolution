@@ -22,8 +22,7 @@ Driver for Sentinel2 L3 Mosaics
 import os
 from enum import Enum
 from typing import List, Optional, Tuple
-#from sensorsio import regulargrid
-from regulargrid import read_as_numpy
+from .regulargrid import read_as_numpy
 
 import numpy as np
 import rasterio as rio
