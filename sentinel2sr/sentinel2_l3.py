@@ -23,7 +23,6 @@ import os
 from enum import Enum
 from typing import List, Optional, Tuple
 from .regulargrid import read_as_numpy
-
 import numpy as np
 import rasterio as rio
 

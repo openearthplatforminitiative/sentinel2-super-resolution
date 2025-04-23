@@ -60,7 +60,10 @@ def read_model_parameters(cfg: str):
         cfg_dict = yaml.safe_load(f)
 
         return ModelParameters(
-            model=cfg_dict["model"],
+            model=os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                f"models/{cfg_dict['model']}",
+            ),
             bands=cfg_dict["bands"],
             margin=cfg_dict["margin"],
             factor=cfg_dict["factor"],
@@ -149,7 +152,13 @@ def run(model_yaml,
 
     """
     setup_logging(loglevel)
-    model_parameters = read_model_parameters(model_yaml)
+
+    model_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        f"models/{model_yaml}.yaml",
+    )
+    print(model_path)
+    model_parameters = read_model_parameters(model_path)
 
     s2_ds = Sentinel2L3(input, year=2024, quartile="Q3")
     # Bands that will be processed
@@ -305,7 +314,3 @@ def run(model_yaml,
     os.remove(input)
 
     return f"{output_dir}/{s2_ds.product_name}_sisr.tif"
-
-
-if __name__ == '__main__':
-    run("./model/s2v2x2_spatrad.yaml", "../data/e46af4b23474a1f85bed9b783f418795.tif", output_dir="../results/")
