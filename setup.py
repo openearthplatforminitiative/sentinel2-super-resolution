@@ -14,7 +14,9 @@ setup(
     url="https://github.com/openearthplatforminitiative/sentinel2-super-resolution",
     license="Apache 2.0",
     packages=find_packages(),
-    include_package_data=False,
+    include_package_data=True,
+    package_data={'': ["*.yaml", "*.onnx"]},
     zip_safe=True,
-    install_requires=open("requirements.txt").read().splitlines()
+    install_requires=open("requirements.txt").read().splitlines(),
+    extras_require={'gpu': ['onnxruntime-gpu', 'nvidia-cudnn-cu12']}
 )
