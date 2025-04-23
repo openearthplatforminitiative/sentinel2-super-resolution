@@ -6,13 +6,13 @@ import logging
 import os
 import sys
 from dataclasses import dataclass
+from collections import namedtuple
 from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort  # type: ignore[import-untyped]
 import rasterio as rio  # type: ignore[import-untyped]
 from affine import Affine  # type: ignore[import-untyped]
-from sensorsio.utils import bb_snap
 from sentinel2_l3 import Sentinel2L3
 from tqdm import tqdm
 import yaml
@@ -33,6 +33,25 @@ class ModelParameters:
     name: str
 
 
+BoundingBox = namedtuple('BoundingBox', ('left', 'bottom', 'right', 'top'))
+
+
+def bb_snap(bounding_box: BoundingBox, align: float = 20) -> BoundingBox:
+    """
+    Snap a bounding box to multiple of align parameter
+
+    :param bb: The bounding box to snap as a BoundingBox object
+    :param align: The step of the grip to align bounding box to
+
+    :return: The snapped bounding box as a BoundingBox object
+    """
+    left = align * np.floor(bounding_box[0] / align)
+    right = left + align * (1 + np.floor((bounding_box[2] - bounding_box[0]) / align))
+    bottom = align * np.floor(bounding_box[1] / align)
+    top = bottom + align * (1 + np.floor((bounding_box[3] - bounding_box[1]) / align))
+    return BoundingBox(left=left, bottom=bottom, right=right, top=top)
+
+
 def read_model_parameters(cfg: str):
     """
     Read yaml file describing model
@@ -47,6 +66,7 @@ def read_model_parameters(cfg: str):
             factor=cfg_dict["factor"],
             name=cfg_dict["name"],
         )
+
 
 def generate_chunks(
     roi: rio.coords.BoundingBox,
