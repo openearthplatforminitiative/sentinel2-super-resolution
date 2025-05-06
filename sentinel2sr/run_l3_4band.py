@@ -305,8 +305,8 @@ def run(model_yaml,
             )
 
             # Convert to RGB
-            rgb = toRGB(cropped_output[0:3])
-            rgb = np.flip(rgb, axis=0)
+            rgb = np.flip(cropped_output[0:3], axis=0)
+            rgb = toRGB(rgb)
 
             # Write output image
             rio_ds.descriptions = tuple(['Red',
