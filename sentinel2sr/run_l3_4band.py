@@ -14,6 +14,7 @@ import onnxruntime as ort  # type: ignore[import-untyped]
 import rasterio as rio  # type: ignore[import-untyped]
 from affine import Affine  # type: ignore[import-untyped]
 from .sentinel2_l3 import Sentinel2L3
+from .toRGB import toRGB
 from tqdm import tqdm
 import yaml
 
@@ -243,9 +244,10 @@ def run(model_yaml,
         "driver": "GTiff",
         "height": int((roi[3] - roi[1]) / target_resolution),
         "width": int((roi[2] - roi[0]) / target_resolution),
-        "count": 4,
-        "dtype": np.int16,
+        "count": 3,
+        "dtype": np.uint8,
         "crs": s2_ds.crs,
+        "photometric": "RGB",
         "transform": transform,
         "nodata": 0,
         "tiled": True,
@@ -302,12 +304,15 @@ def run(model_yaml,
                 int(np.ceil((chunk.target_area.top - chunk.target_area.bottom) / target_resolution)),
             )
 
+            # Convert to RGB
+            rgb = toRGB(cropped_output[0:3])
+            rgb = np.flip(rgb, axis=0)
+
             # Write output image
-            rio_ds.descriptions = tuple(['Blue',
+            rio_ds.descriptions = tuple(['Red',
                                          'Green',
-                                         'Red',
-                                         'NIR'])
-            rio_ds.write(cropped_output, window=window)
+                                         'Blue'])
+            rio_ds.write(rgb, window=window)
 
     # Mark file as complete and remove old file
     os.rename(out_sr_file, f"{output_dir}/{s2_ds.product_name}_sisr.tif")
