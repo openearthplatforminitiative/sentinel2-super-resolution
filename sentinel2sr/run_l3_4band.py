@@ -158,7 +158,6 @@ def run(model_yaml,
         os.path.dirname(os.path.abspath(__file__)),
         f"models/{model_yaml}.yaml",
     )
-    print(model_path)
     model_parameters = read_model_parameters(model_path)
 
     s2_ds = Sentinel2L3(input, year=2024, quartile="Q3")
@@ -301,7 +300,7 @@ def run(model_yaml,
                 int(np.ceil((chunk.target_area.left - roi.left) / target_resolution)),
                 int(np.floor((roi.top - chunk.target_area.top) / target_resolution)),
                 int(np.floor((chunk.target_area.right - chunk.target_area.left) / target_resolution)),
-                int(np.ceil((chunk.target_area.top - chunk.target_area.bottom) / target_resolution)),
+                int(np.floor((chunk.target_area.top - chunk.target_area.bottom) / target_resolution)),
             )
 
             # Convert to RGB
