@@ -160,7 +160,7 @@ def run(model_yaml,
     )
     model_parameters = read_model_parameters(model_path)
 
-    s2_ds = Sentinel2L3(input, year=2024, quartile="Q3")
+    s2_ds = Sentinel2L3(input)
     # Bands that will be processed
     bands = [Sentinel2L3.Band(b) for b in model_parameters.bands]
     level = "_L3_"

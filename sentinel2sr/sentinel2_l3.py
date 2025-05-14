@@ -35,8 +35,6 @@ class Sentinel2L3:
     def __init__(
         self,
         product_path: str,
-        year: int,
-        quartile: str,
         offsets: Optional[Tuple[float, float]] = None
     ):
         """
@@ -50,8 +48,10 @@ class Sentinel2L3:
         self.product_name = os.path.basename(product_path)
 
         # Strip zip extension if exists
-        if self.product_name.endswith(".tif") or self.product_name.endswith(".tiff"):
+        if self.product_name.endswith(".tif"):
             self.product_name = self.product_name[:-4]
+        elif self.product_name.endswith(".tiff"):
+            self.product_name = self.product_name[:-5]
 
         # Store offsets
         self.offsets = offsets
@@ -63,11 +63,7 @@ class Sentinel2L3:
         # Get tile
         self.tile = self.product_name
 
-        # Get acquisition date
-        self.year = year
-        self.quartile = quartile
-
-        with rio.open(self.build_band_path(Sentinel2L3.B2)) as dataset:
+        with rio.open(self.build_band_path()) as dataset:
             # Get bounds
             self.bounds = dataset.bounds
             self.transform = dataset.transform
@@ -75,7 +71,7 @@ class Sentinel2L3:
             self.crs = dataset.crs
 
     def __repr__(self):
-        return f"{self.satellite}, {self.year}, {self.quartile}, {self.tile}"
+        return f"{self.satellite}, {self.tile}"
 
     class Satellite(Enum):
         """
@@ -146,20 +142,18 @@ class Sentinel2L3:
         B8: 10,
     }
 
-    def build_band_path(self, band: Band) -> str:
+    def build_band_path(self) -> str:
         """
-        Build path to a band for product
-        :param band: The band to build path for as a Sentinel2.Band enum value
-        :param prefix: The band prefix (FRE_ or SRE_)
+        Build path to bands for product
 
-        :return: The path to the band file
+        :return: The path to the bands
         """
         band_path = os.path.join(self.product_dir, f"{self.product_name}.tif")
 
         # Raise
         if not os.path.exists(band_path):
             raise FileNotFoundError(
-                f"Could not find band {band.value} in directory {self.product_dir}"
+                f"Could not find product {self.product_name} in directory {self.product_dir}"
             )
         return band_path
 
@@ -203,7 +197,7 @@ class Sentinel2L3:
 
         if len(bands):
 
-            img_files = [self.build_band_path(self.B2)]
+            img_files = [self.build_band_path()]
             np_arr, xcoords, ycoords, out_crs = read_as_numpy(
                 img_files,
                 crs=crs,

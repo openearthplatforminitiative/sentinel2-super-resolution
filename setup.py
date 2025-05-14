@@ -17,5 +17,5 @@ setup(
     package_data={'': ["*.yaml", "*.onnx"]},
     zip_safe=True,
     install_requires=open("requirements.txt").read().splitlines(),
-    extras_require={'gpu': ['onnxruntime-gpu', 'nvidia-cudnn-cu12']}
+    extras_require={'gpu': ['onnxruntime-gpu', 'nvidia-cudnn-cu11']}
 )
