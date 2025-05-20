@@ -81,9 +81,6 @@ def generate_chunks(
     Class initializer
     """
     # Find number of chunks in each dimension
-
-    print((roi.right - roi.left) / tile_size_in_meters)
-
     nb_chunks_x = np.ceil((roi.right - roi.left) / tile_size_in_meters)
     nb_chunks_y = np.ceil((roi.top - roi.bottom) / tile_size_in_meters)
 
@@ -110,7 +107,6 @@ def generate_chunks(
             min(cx + tile_size_in_meters, roi.right),
             min(cy + tile_size_in_meters, roi.top),
         )
-        #print(target_area)
         # Source area is target area padded with margin
         source_area = rio.coords.BoundingBox(
             left=target_area.left - margin_in_meters,
