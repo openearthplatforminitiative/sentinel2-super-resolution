@@ -2,10 +2,10 @@ import math
 import numpy as np
 
 # Contrast enhance / highlight compress
-maxR = 3.0 # max reflectance
-midR = 0.13
-sat = 1.2
-gamma = 1.8
+maxR = 4.0 # max reflectance
+midR = 0.17
+sat = 1.5
+gamma = 1.9
 scalefac = 10000
 
 gOff = 0.01
